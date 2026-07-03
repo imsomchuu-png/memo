@@ -47,14 +47,22 @@ def prepare_df(df: pd.DataFrame) -> pd.DataFrame:
 
 def to_editor_df(df: pd.DataFrame) -> pd.DataFrame:
     df = prepare_df(df)
-    editor_df = df.copy()
-    editor_df["보유수량"] = editor_df["보유수량"].map(lambda x: "" if x == 0 else str(int(x)))
-    editor_df["시가배당률(%)"] = editor_df["시가배당률(%)"].map(
+
+    if df.empty:
+        return pd.DataFrame({col: pd.Series(dtype="string") for col in ALL_COLS})
+
+    editor_df = pd.DataFrame(index=df.index)
+    editor_df[YEAR_COL] = df[YEAR_COL].astype("string")
+    editor_df["종목명"] = df["종목명"].astype("string")
+    editor_df["종목코드"] = df["종목코드"].astype("string")
+    editor_df["보유수량"] = df["보유수량"].map(lambda x: "" if x == 0 else str(int(x))).astype("string")
+    editor_df["시가배당률(%)"] = df["시가배당률(%)"].map(
         lambda x: "" if x == 0 else f"{x:g}"
-    )
+    ).astype("string")
     for col in MONTH_COLS:
-        editor_df[col] = editor_df[col].map(lambda x: "" if x == 0 else str(int(x)))
-    return editor_df
+        editor_df[col] = df[col].map(lambda x: "" if x == 0 else str(int(x))).astype("string")
+
+    return editor_df[ALL_COLS]
 
 
 def load_data() -> pd.DataFrame:
